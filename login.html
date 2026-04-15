@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Сүлд Систем - Нэвтрэх</title>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #312e81 100%);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      padding: 1.5rem; position: relative; overflow: hidden;
+    }
+
+    body::before, body::after {
+      content: ''; position: fixed; border-radius: 50%;
+      filter: blur(80px); opacity: 0.22; pointer-events: none;
+      animation: float 8s ease-in-out infinite;
+    }
+    body::before {
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, #3b82f6, #8b5cf6);
+      top: -100px; left: -100px;
+    }
+    body::after {
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, #06b6d4, #2563eb);
+      bottom: -80px; right: -80px;
+      animation-delay: 4s; animation-direction: reverse;
+    }
+    @keyframes float {
+      0%,100% { transform: translateY(0) scale(1); }
+      50%      { transform: translateY(30px) scale(1.05); }
+    }
+
+    .card {
+      background: rgba(255,255,255,0.06);
+      backdrop-filter: blur(24px);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 28px;
+      padding: 2.75rem 2.25rem;
+      max-width: 420px; width: 100%;
+      position: relative; z-index: 1;
+      box-shadow: 0 32px 80px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.15);
+      animation: fadeUp .65s cubic-bezier(.22,1,.36,1) both;
+    }
+    @keyframes fadeUp {
+      from { opacity:0; transform:translateY(28px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+
+    .logo-ring {
+      width: 80px; height: 80px; border-radius: 50%;
+      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 1.25rem;
+      box-shadow: 0 8px 32px rgba(59,130,246,.5), 0 0 0 12px rgba(59,130,246,.1);
+      animation: pulse-ring 2.5s ease-in-out infinite;
+    }
+    @keyframes pulse-ring {
+      0%,100% { box-shadow: 0 8px 32px rgba(59,130,246,.5), 0 0 0 12px rgba(59,130,246,.12); }
+      50%      { box-shadow: 0 8px 32px rgba(139,92,246,.6), 0 0 0 20px rgba(139,92,246,.08); }
+    }
+    .logo-ring .material-icons-round { font-size: 2.2rem; color: #fff; }
+
+    .card-header { text-align: center; margin-bottom: 2rem; }
+    .card-header h1 { font-size: 1.7rem; font-weight: 900; color: #fff; letter-spacing: .03em; margin-bottom: .35rem; }
+    .card-header p  { font-size: .82rem; color: rgba(255,255,255,.45); }
+
+    .field { margin-bottom: .9rem; }
+    .field label {
+      display: flex; align-items: center; gap: .4rem;
+      font-size: .72rem; font-weight: 700;
+      color: rgba(255,255,255,.55);
+      text-transform: uppercase; letter-spacing: .07em;
+      margin-bottom: .4rem;
+    }
+    .field label .material-icons-round { font-size: .9rem; color: #60a5fa; }
+
+    .input-wrap { position: relative; }
+    .field input {
+      width: 100%;
+      background: rgba(255,255,255,0.07);
+      border: 1.5px solid rgba(255,255,255,0.12);
+      border-radius: 12px; color: #fff;
+      font-size: .95rem; padding: 12px 14px;
+      outline: none; font-family: inherit;
+      transition: border-color .2s, box-shadow .2s, background .2s;
+    }
+    .field input::placeholder { color: rgba(255,255,255,.28); }
+    .field input:focus {
+      border-color: #60a5fa;
+      background: rgba(255,255,255,.1);
+      box-shadow: 0 0 0 3px rgba(96,165,250,.2);
+    }
+
+    .pw-toggle {
+      position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+      background: none; border: none; cursor: pointer; padding: 2px;
+      color: rgba(255,255,255,.35); transition: color .15s;
+      display: flex; align-items: center;
+    }
+    .pw-toggle:hover { color: rgba(255,255,255,.7); }
+    .pw-toggle .material-icons-round { font-size: 1.1rem; }
+
+    .field-error {
+      font-size: .72rem; color: #fca5a5;
+      margin-top: .3rem; display: none;
+      align-items: center; gap: .25rem;
+    }
+    .field-error.show { display: flex; }
+    .field-error .material-icons-round { font-size: .85rem; }
+
+    .btn-submit {
+      width: 100%; margin-top: 1.5rem;
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      color: #fff; border: none; border-radius: 14px;
+      padding: 13px; font-size: 1rem; font-weight: 800;
+      cursor: pointer; letter-spacing: .02em;
+      display: flex; align-items: center; justify-content: center; gap: .5rem;
+      box-shadow: 0 8px 24px rgba(245,158,11,.35);
+      transition: transform .17s, box-shadow .17s;
+    }
+    .btn-submit:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 14px 32px rgba(245,158,11,.45); }
+    .btn-submit:active { transform: scale(.97); }
+    .btn-submit:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+    .btn-submit .material-icons-round { font-size: 1.1rem; }
+
+    #alert-box {
+      border-radius: 12px; padding: 11px 14px;
+      font-size: .82rem; font-weight: 600;
+      display: none; align-items: center; gap: .5rem;
+      margin-bottom: 1rem;
+    }
+    #alert-box.show { display: flex; }
+    #alert-box.error   { background: rgba(127,29,29,.6); border: 1px solid rgba(252,165,165,.2); color: #fca5a5; }
+    #alert-box.loading { background: rgba(30,58,138,.5); border: 1px solid rgba(147,197,253,.2); color: #93c5fd; }
+    #alert-box .material-icons-round { font-size: 1.1rem; flex-shrink: 0; }
+
+    .divider {
+      display: flex; align-items: center; gap: .75rem; margin: 1.5rem 0 1rem;
+    }
+    .divider span { flex: 1; height: 1px; background: rgba(255,255,255,.1); }
+    .divider p { font-size: .68rem; font-weight: 700; color: rgba(255,255,255,.25); text-transform: uppercase; letter-spacing: .08em; white-space: nowrap; }
+
+    .back-link {
+      display: inline-flex; align-items: center; gap: .35rem;
+      color: rgba(255,255,255,.35); font-size: .75rem; font-weight: 600;
+      text-decoration: none; transition: color .15s; margin-bottom: 1.5rem;
+    }
+    .back-link:hover { color: rgba(255,255,255,.7); }
+    .back-link .material-icons-round { font-size: 1rem; }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <a href="index.html" class="back-link">
+    <span class="material-icons-round">arrow_back</span>
+    Буцах
+  </a>
+
+  <div class="card-header">
+    <div class="logo-ring">
+      <span class="material-icons-round">shield</span>
+    </div>
+    <h1>Сүлд Систем</h1>
+    <p>Системд нэвтрэхийн тулд мэдээллээ оруулна уу</p>
+  </div>
+
+  <div id="alert-box">
+    <span class="material-icons-round" id="alert-icon">error</span>
+    <span id="alert-msg"></span>
+  </div>
+
+  <form id="loginForm" novalidate>
+    <div class="divider"><span></span><p>Нэвтрэх мэдээлэл</p><span></span></div>
+
+    <div class="field">
+      <label><span class="material-icons-round">badge</span> Нэвтрэх нэр</label>
+      <input type="text" id="username" placeholder="username" autocomplete="username" required>
+      <div class="field-error" id="username-err">
+        <span class="material-icons-round">error_outline</span>
+        <span>Нэвтрэх нэр оруулна уу</span>
+      </div>
+    </div>
+
+    <div class="field">
+      <label><span class="material-icons-round">lock</span> Нууц үг</label>
+      <div class="input-wrap">
+        <input type="password" id="password" placeholder="••••••••" autocomplete="current-password" required>
+        <button type="button" class="pw-toggle" id="pw-toggle" tabindex="-1">
+          <span class="material-icons-round" id="pw-icon">visibility</span>
+        </button>
+      </div>
+      <div class="field-error" id="password-err">
+        <span class="material-icons-round">error_outline</span>
+        <span>Нууц үг оруулна уу</span>
+      </div>
+    </div>
+
+    <button type="submit" class="btn-submit" id="submit-btn">
+      <span class="material-icons-round">login</span>
+      Нэвтрэх
+    </button>
+  </form>
+</div>
+
+<script>
+  // ── 1. Division-д үндэслэн чиглүүлэх — ЭХЭЛЖ тодорхойлох ────────────────
+  function redirect(division) {
+    const routes = {
+      1: 'admin.html',
+      2: 'engineer.html',
+      3: 'operator.html',
+      4: 'hr.html',
+    };
+    window.location.href = routes[division] || 'index.html';
+  }
+
+  // ── 2. Аль хэдийн нэвтэрсэн бол шууд чиглүүлэх — redirect ДАРАА дуудах ──
+  (function() {
+  const token    = localStorage.getItem('accessToken');
+  const division = parseInt(localStorage.getItem('division') || '0');
+  
+  // Token байгаа бөгөөд division зөв бол л чиглүүлэх
+  if (token && division > 0) {
+    redirect(division);
+  } else {
+    // Хуучин/дутуу мэдээллийг цэвэрлэх
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('username');
+    localStorage.removeItem('fname');
+    localStorage.removeItem('division');
+  }
+})();
+
+  // ── Alert ─────────────────────────────────────────────────────────────────
+  function showAlert(msg, type = 'error') {
+    const box   = document.getElementById('alert-box');
+    const msgEl = document.getElementById('alert-msg');
+    const icon  = document.getElementById('alert-icon');
+    msgEl.textContent = msg;
+    icon.textContent  = type === 'loading' ? 'sync' : 'error';
+    icon.style.animation = type === 'loading' ? 'spin 1s linear infinite' : '';
+    box.className = `show ${type}`;
+  }
+
+  function hideAlert() {
+    document.getElementById('alert-box').className = '';
+  }
+
+  // ── Validation ────────────────────────────────────────────────────────────
+  function validate() {
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value;
+    document.getElementById('username-err').classList.toggle('show', !username);
+    document.getElementById('password-err').classList.toggle('show', !password);
+    return !!(username && password);
+  }
+
+  // ── Password харах/нуух ───────────────────────────────────────────────────
+  document.getElementById('pw-toggle').addEventListener('click', () => {
+    const input = document.getElementById('password');
+    const icon  = document.getElementById('pw-icon');
+    const isPassword = input.type === 'password';
+    input.type       = isPassword ? 'text' : 'password';
+    icon.textContent = isPassword ? 'visibility_off' : 'visibility';
+  });
+
+  // ── Login submit ──────────────────────────────────────────────────────────
+  document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    hideAlert();
+
+    if (!validate()) return;
+
+    const btn = document.getElementById('submit-btn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="material-icons-round" style="animation:spin 1s linear infinite;">sync</span> Нэвтэрч байна...';
+    showAlert('Нэвтэрч байна...', 'loading');
+
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value;
+
+    try {
+      const res  = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        showAlert(data.message || 'Нэвтрэх нэр эсвэл нууц үг буруу байна');
+        return;
+      }
+
+      localStorage.setItem('accessToken', data.accessToken);
+      localStorage.setItem('username',    data.username);
+      localStorage.setItem('fname',       data.fname || '');
+      localStorage.setItem('division',    data.division || 0);
+
+      showAlert('Амжилттай нэвтэрлээ! Чиглүүлж байна...', 'loading');
+      setTimeout(() => redirect(data.division), 600);
+
+    } catch (err) {
+      console.error('Login алдаа:', err);
+      showAlert('Сервертэй холбогдох боломжгүй байна');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<span class="material-icons-round">login</span> Нэвтрэх';
+    }
+  });
+
+  // ── Enter → password талбар руу шилжих ───────────────────────────────────
+  document.getElementById('username').addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('password').focus();
+  });
+</script>
+
+</body>
+</html>
