@@ -1,0 +1,51 @@
+@baseUrl = http://127.0.0.1:3000
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im9wZXJhdG9yIiwiaWQiOjksImlhdCI6MTc3MjQxNTMxM30.MAx-V7If1jmpU_PpK4hnaGyBhJvSWmLpWMxKXgmLHHo
+
+### 1. Username байгаа эсэх шалгах
+POST {{baseUrl}}/api/auth/exists
+Content-Type: application/json
+
+{
+  "username": "testuser"
+}
+
+### 2. Шинэ хэрэглэгч үүсгэх
+POST {{baseUrl}}/api/auth/create
+Content-Type: application/json
+
+{
+  "username": "operator",
+  "password": "1234",
+  "fname": "Operator",
+  "lname": "1",
+  "division": 3
+}
+
+### 3. Нэвтрэх → token авах
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "operator",
+  "password": "Tuulai0915"
+}
+
+### 4. Token шалгах
+GET {{baseUrl}}/api/auth/check
+Authorization: Bearer {{token}}
+
+### 5. Өөрийн мэдээлэл харах
+GET {{baseUrl}}/api/auth/account
+Authorization: Bearer {{token}}
+
+### 6. Нэрээ шинэчлэх
+PATCH {{baseUrl}}/api/auth/account
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "fname": "New First Name",
+  "lname": "New Last Name"
+}
+### 7. branches
+GET http://localhost:3000/api/branches
