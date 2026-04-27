@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Хэрэглэгчид — Сүлд Систем</title>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { min-height:100vh;background:linear-gradient(135deg,#0f172a 0%,#1e3a8a 50%,#312e81 100%);font-family:'Segoe UI',system-ui,sans-serif;color:#fff; }
+    body::before,body::after { content:'';position:fixed;border-radius:50%;filter:blur(90px);opacity:.1;pointer-events:none;z-index:0; }
+    body::before { width:600px;height:600px;background:radial-gradient(circle,#10b981,#06b6d4);top:-200px;left:-200px; }
+    body::after  { width:500px;height:500px;background:radial-gradient(circle,#8b5cf6,#3b82f6);bottom:-150px;right:-150px; }
+
+    /* Header */
+    .hdr { position:sticky;top:0;z-index:200;display:flex;align-items:center;justify-content:space-between;gap:1rem;background:rgba(10,16,32,.88);backdrop-filter:blur(28px);border-bottom:1px solid rgba(255,255,255,.07);padding:.7rem 2rem; }
+    .hdr-brand { display:flex;align-items:center;gap:1rem;text-decoration:none; }
+    .hdr-brand img { height:44px;filter:drop-shadow(0 2px 12px rgba(59,130,246,.4)); }
+    .brand-name { font-size:1.15rem;font-weight:900;background:linear-gradient(135deg,#60a5fa,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text; }
+    .hdr-user { position:relative;flex-shrink:0; }
+    .usr-btn { display:flex;align-items:center;gap:.6rem;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:.45rem .85rem .45rem .5rem;cursor:pointer;color:#fff;font-size:.88rem;transition:background .2s; }
+    .usr-btn:hover { background:rgba(255,255,255,.11); }
+    .usr-btn.open { border-color:rgba(99,102,241,.5);background:rgba(99,102,241,.12); }
+    .av { width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#3b82f6,#8b5cf6);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.82rem;flex-shrink:0; }
+    .chevron { font-size:1.05rem!important;opacity:.55;transition:transform .2s; }
+    .usr-btn.open .chevron { transform:rotate(180deg); }
+    .dropdown { position:absolute;top:calc(100% + 10px);right:0;width:270px;background:rgba(10,16,36,.97);backdrop-filter:blur(28px);border:1px solid rgba(255,255,255,.1);border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.6);opacity:0;transform:translateY(-8px) scale(.97);pointer-events:none;transition:opacity .18s,transform .18s;z-index:300; }
+    .dropdown.open { opacity:1;transform:none;pointer-events:all; }
+    .dp-head { display:flex;align-items:center;gap:1rem;padding:1.2rem 1.2rem .9rem;border-bottom:1px solid rgba(255,255,255,.07); }
+    .av-lg { width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#3b82f6,#8b5cf6);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1.1rem;flex-shrink:0;box-shadow:0 0 0 3px rgba(59,130,246,.2); }
+    .dp-nm { font-weight:700;font-size:.95rem; } .dp-sub { font-size:.7rem;color:rgba(255,255,255,.4);margin-top:.15rem; }
+    .dp-body { padding:.85rem 1.2rem;display:flex;flex-direction:column;gap:.55rem; }
+    .dp-row  { display:flex;align-items:center;gap:.5rem;font-size:.8rem;color:rgba(255,255,255,.6); }
+    .dp-row .material-icons-round { font-size:.95rem;color:#60a5fa;flex-shrink:0; }
+    .dp-foot { padding:.5rem 1.2rem 1.2rem; }
+    .dp-divider { height:1px;background:rgba(255,255,255,.07);margin-bottom:.85rem; }
+    .logout-btn { width:100%;display:flex;align-items:center;justify-content:center;gap:.45rem;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);color:#fca5a5;border-radius:9px;padding:.55rem;cursor:pointer;font-size:.82rem;font-weight:600;transition:background .2s; }
+    .logout-btn:hover { background:rgba(239,68,68,.2); }
+
+    /* Main */
+    .main { padding:2rem;max-width:1240px;margin:0 auto;position:relative;z-index:1; }
+    .pg-hdr { display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;flex-wrap:wrap; }
+    .back-btn { display:inline-flex;align-items:center;gap:.35rem;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.75);border-radius:10px;padding:.5rem .9rem;font-size:.84rem;text-decoration:none;transition:background .2s,color .2s; }
+    .back-btn:hover { background:rgba(255,255,255,.11);color:#fff; }
+    .back-btn .material-icons-round { font-size:1.05rem; }
+    .pg-title { font-size:1.5rem;font-weight:800;display:flex;align-items:center;gap:.6rem; }
+    .pg-title .material-icons-round { color:#34d399; }
+    .count-pill { background:rgba(16,185,129,.18);border:1px solid rgba(16,185,129,.3);color:#6ee7b7;border-radius:20px;padding:.2rem .7rem;font-size:.8rem;font-weight:600; }
+
+    .toolbar { display:flex;gap:.75rem;margin-bottom:1.5rem;align-items:center;flex-wrap:wrap; }
+    .search-wrap { flex:1;position:relative;min-width:180px;max-width:380px; }
+    .search-wrap .material-icons-round { position:absolute;left:.85rem;top:50%;transform:translateY(-50%);font-size:1.1rem;color:rgba(255,255,255,.35);pointer-events:none; }
+    .search-inp { width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:12px;color:#fff;font-size:.9rem;font-family:inherit;padding:.65rem .85rem .65rem 2.4rem;outline:none;transition:border-color .2s; }
+    .search-inp::placeholder { color:rgba(255,255,255,.28); }
+    .search-inp:focus { border-color:#34d399;background:rgba(255,255,255,.09); }
+    .add-btn { display:inline-flex;align-items:center;gap:.4rem;background:linear-gradient(135deg,#10b981,#06b6d4);border:none;color:#fff;border-radius:11px;padding:.65rem 1.2rem;font-size:.88rem;font-weight:700;cursor:pointer;box-shadow:0 4px 18px rgba(16,185,129,.35);transition:transform .15s,filter .15s;white-space:nowrap;margin-left:auto; }
+    .add-btn:hover { transform:translateY(-2px);filter:brightness(1.1); }
+    .add-btn .material-icons-round { font-size:1.1rem; }
+
+    /* User cards */
+    .cards-grid { display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1.25rem; }
+    .user-card { background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);border-radius:16px;padding:1.4rem 1.25rem .9rem;transition:transform .22s,box-shadow .22s,border-color .22s;animation:fadeUp .4s ease both;display:flex;flex-direction:column;align-items:center;text-align:center; }
+    .user-card:hover { transform:translateY(-5px);box-shadow:0 16px 50px rgba(0,0,0,.35);border-color:rgba(16,185,129,.3); }
+    .uc-av { width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1.4rem;margin-bottom:.85rem;box-shadow:0 4px 20px rgba(16,185,129,.3); }
+    .uc-name { font-size:.95rem;font-weight:700;margin-bottom:.2rem; }
+    .uc-un   { font-size:.78rem;color:rgba(255,255,255,.45);margin-bottom:.6rem; }
+    .uc-div  { display:inline-flex;align-items:center;gap:.3rem;background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.25);color:#6ee7b7;border-radius:20px;padding:.2rem .65rem;font-size:.72rem;font-weight:600;margin-bottom:.9rem; }
+    .uc-foot { width:100%;padding-top:.85rem;border-top:1px solid rgba(255,255,255,.07);display:flex;gap:.4rem;justify-content:center; }
+    .ic-btn { display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:8px;border:none;cursor:pointer;transition:background .18s; }
+    .ic-btn .material-icons-round { font-size:1rem; }
+    .view-btn { background:rgba(16,185,129,.15);color:#6ee7b7; }  .view-btn:hover { background:rgba(16,185,129,.28); }
+    .edit-btn { background:rgba(59,130,246,.15);color:#93c5fd; }   .edit-btn:hover { background:rgba(59,130,246,.28); }
+    .del-btn  { background:rgba(239,68,68,.15);color:#fca5a5; }    .del-btn:hover  { background:rgba(239,68,68,.28); }
+
+    .state-msg { text-align:center;padding:4rem 2rem;color:rgba(255,255,255,.35);font-size:.9rem; }
+    .state-msg .material-icons-round { font-size:3rem;display:block;margin-bottom:.75rem; }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+
+    /* Detail modal */
+    .overlay { position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(6px);z-index:500;display:flex;align-items:center;justify-content:center;padding:1.5rem;opacity:0;pointer-events:none;transition:opacity .22s; }
+    .overlay.open { opacity:1;pointer-events:all; }
+    .modal { background:#0d1525;border:1px solid rgba(255,255,255,.12);border-radius:22px;width:100%;max-width:480px;max-height:88vh;overflow-y:auto;transform:translateY(20px) scale(.97);transition:transform .22s;box-shadow:0 32px 80px rgba(0,0,0,.7); }
+    .overlay.open .modal { transform:none; }
+    .modal::-webkit-scrollbar { width:5px; }
+    .modal::-webkit-scrollbar-thumb { background:rgba(255,255,255,.12);border-radius:3px; }
+    .modal-top { position:sticky;top:0;z-index:10;display:flex;align-items:center;justify-content:space-between;background:rgba(13,21,37,.97);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,.07);padding:1.1rem 1.5rem; }
+    .modal-title { font-size:1.1rem;font-weight:700;display:flex;align-items:center;gap:.5rem; }
+    .modal-title .material-icons-round { color:#34d399; }
+    .close-btn { width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.7);cursor:pointer;transition:background .18s; }
+    .close-btn:hover { background:rgba(255,255,255,.14);color:#fff; }
+    .modal-body { padding:1.5rem; }
+    .m-profile { display:flex;flex-direction:column;align-items:center;text-align:center;padding-bottom:1.25rem;margin-bottom:1.25rem;border-bottom:1px solid rgba(255,255,255,.07); }
+    .m-av { width:76px;height:76px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1.6rem;margin-bottom:.85rem;box-shadow:0 6px 24px rgba(16,185,129,.35); }
+    .m-name { font-size:1.15rem;font-weight:800;margin-bottom:.25rem; }
+    .m-un   { font-size:.82rem;color:rgba(255,255,255,.45); }
+    .info-grid { display:grid;grid-template-columns:1fr 1fr;gap:.85rem; }
+    @media(max-width:400px){ .info-grid { grid-template-columns:1fr; } }
+    .info-item { background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:.75rem 1rem; }
+    .info-label { font-size:.7rem;font-weight:600;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.3rem;display:flex;align-items:center;gap:.35rem; }
+    .info-label .material-icons-round { font-size:.85rem;color:#34d399; }
+    .info-val { font-size:.9rem;color:rgba(255,255,255,.85); }
+
+    /* Form modal */
+    .form-overlay { position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);z-index:600;display:flex;align-items:center;justify-content:center;padding:1.5rem;opacity:0;pointer-events:none;transition:opacity .22s; }
+    .form-overlay.open { opacity:1;pointer-events:all; }
+    .form-modal { background:#0d1525;border:1px solid rgba(255,255,255,.12);border-radius:22px;width:100%;max-width:520px;max-height:92vh;overflow-y:auto;transform:translateY(24px) scale(.97);transition:transform .22s;box-shadow:0 32px 80px rgba(0,0,0,.75); }
+    .form-overlay.open .form-modal { transform:none; }
+    .form-modal::-webkit-scrollbar { width:5px; }
+    .form-modal::-webkit-scrollbar-thumb { background:rgba(255,255,255,.12);border-radius:3px; }
+    .fm-top { position:sticky;top:0;z-index:10;display:flex;align-items:center;justify-content:space-between;background:rgba(13,21,37,.97);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,.07);padding:1.1rem 1.5rem; }
+    .fm-title { font-size:1.1rem;font-weight:700;display:flex;align-items:center;gap:.5rem; }
+    .fm-title .material-icons-round { color:#34d399; }
+    .fm-body { padding:1.5rem;display:flex;flex-direction:column;gap:1rem; }
+    .fm-grid { display:grid;grid-template-columns:1fr 1fr;gap:1rem; }
+    @media(max-width:520px){ .fm-grid { grid-template-columns:1fr; } }
+    .fm-full { grid-column:1/-1; }
+    .f-group { display:flex;flex-direction:column;gap:.4rem; }
+    .f-label { font-size:.74rem;font-weight:700;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.06em;display:flex;align-items:center;gap:.35rem; }
+    .f-label .material-icons-round { font-size:.85rem;color:#34d399; }
+    .f-label .req { color:#f87171;margin-left:.15rem; }
+    .f-input { width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:10px;color:#fff;font-size:.9rem;font-family:inherit;padding:.6rem .85rem;outline:none;transition:border-color .2s,background .2s; }
+    .f-input::placeholder { color:rgba(255,255,255,.28); }
+    .f-input:focus { border-color:#34d399;background:rgba(255,255,255,.09); }
+    .f-input:disabled { opacity:.5;cursor:not-allowed; }
+    .f-note { font-size:.72rem;color:rgba(255,255,255,.38); }
+    .f-err  { font-size:.75rem;color:#f87171;display:none; }
+    .f-err.show { display:block; }
+
+    .fm-alert { display:none;align-items:center;gap:.5rem;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.25);color:#fca5a5;border-radius:10px;padding:.65rem .9rem;font-size:.83rem;margin-bottom:.5rem; }
+    .fm-alert.show { display:flex; }
+    .fm-foot { padding:1rem 1.5rem 1.5rem;display:flex;gap:.75rem;justify-content:flex-end;border-top:1px solid rgba(255,255,255,.07); }
+    .btn-cancel { display:inline-flex;align-items:center;gap:.4rem;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.7);border-radius:10px;padding:.65rem 1.2rem;font-size:.88rem;font-weight:600;cursor:pointer;transition:background .18s; }
+    .btn-cancel:hover { background:rgba(255,255,255,.12); }
+    .btn-save { display:inline-flex;align-items:center;gap:.4rem;background:linear-gradient(135deg,#10b981,#06b6d4);border:none;color:#fff;border-radius:10px;padding:.65rem 1.4rem;font-size:.88rem;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(16,185,129,.35);transition:filter .15s,transform .15s; }
+    .btn-save:hover { filter:brightness(1.1);transform:translateY(-1px); }
+    .btn-save:disabled { opacity:.5;cursor:not-allowed;transform:none; }
+    .btn-save .material-icons-round,.btn-cancel .material-icons-round { font-size:1rem; }
+    @keyframes spin { to{transform:rotate(360deg)} }
+
+    /* Confirm */
+    .cfm-overlay { position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);z-index:700;display:flex;align-items:center;justify-content:center;padding:1.5rem;opacity:0;pointer-events:none;transition:opacity .18s; }
+    .cfm-overlay.open { opacity:1;pointer-events:all; }
+    .cfm-box { background:#0d1525;border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:1.75rem;max-width:340px;width:100%;text-align:center;transform:scale(.95);transition:transform .18s;box-shadow:0 24px 60px rgba(0,0,0,.7); }
+    .cfm-overlay.open .cfm-box { transform:none; }
+    .cfm-icon { width:52px;height:52px;border-radius:50%;background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);display:flex;align-items:center;justify-content:center;margin:0 auto .9rem; }
+    .cfm-icon .material-icons-round { font-size:1.4rem;color:#f87171; }
+    .cfm-title { font-size:1rem;font-weight:700;margin-bottom:.4rem; }
+    .cfm-text  { font-size:.84rem;color:rgba(255,255,255,.5);margin-bottom:1.25rem;line-height:1.5; }
+    .cfm-btns  { display:flex;gap:.75rem;justify-content:center; }
+    .cfm-no  { flex:1;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.7);border-radius:10px;padding:.6rem;font-size:.88rem;font-weight:600;cursor:pointer;transition:background .18s; }
+    .cfm-no:hover { background:rgba(255,255,255,.12); }
+    .cfm-yes { flex:1;background:linear-gradient(135deg,#ef4444,#dc2626);border:none;color:#fff;border-radius:10px;padding:.6rem;font-size:.88rem;font-weight:700;cursor:pointer;transition:filter .15s; }
+    .cfm-yes:hover { filter:brightness(1.1); }
+
+    @media(max-width:600px){ .main{padding:1rem} .hdr{padding:.6rem 1rem} }
+  </style>
+</head>
+<body>
+
+<header class="hdr">
+  <a href="dashboard.html" class="hdr-brand"><img src="logo-big.png" alt="Сүлд"><span class="brand-name">Сүлд Систем</span></a>
+  <div class="hdr-user">
+    <button class="usr-btn" id="usr-btn"><div class="av" id="av-sm">?</div><span id="hdr-name">...</span><span class="material-icons-round chevron">expand_more</span></button>
+    <div class="dropdown" id="dropdown">
+      <div class="dp-head"><div class="av-lg" id="av-lg">?</div><div><div class="dp-nm" id="dp-nm">—</div><div class="dp-sub">Хэрэглэгч</div></div></div>
+      <div class="dp-body"><div class="dp-row"><span class="material-icons-round">badge</span><span id="dp-un">—</span></div><div class="dp-row"><span class="material-icons-round">corporate_fare</span><span id="dp-div">—</span></div></div>
+      <div class="dp-foot"><div class="dp-divider"></div><button class="logout-btn" id="logout-btn"><span class="material-icons-round">logout</span>Гарах</button></div>
+    </div>
+  </div>
+</header>
+
+<main class="main">
+  <div class="pg-hdr">
+    <a href="dashboard.html" class="back-btn"><span class="material-icons-round">arrow_back</span>Буцах</a>
+    <h1 class="pg-title"><span class="material-icons-round">people</span>Хэрэглэгчид<span class="count-pill" id="count-pill">—</span></h1>
+  </div>
+  <div class="toolbar">
+    <div class="search-wrap"><span class="material-icons-round">search</span><input class="search-inp" id="search" type="text" placeholder="Хэрэглэгч хайх..."></div>
+    <button class="add-btn" id="add-btn"><span class="material-icons-round">person_add</span>Шинэ хэрэглэгч</button>
+  </div>
+  <div class="cards-grid" id="cards-grid"><div class="state-msg"><span class="material-icons-round">sync</span>Мэдээлэл татаж байна...</div></div>
+</main>
+
+<!-- Detail modal -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <div class="modal-top"><div class="modal-title"><span class="material-icons-round">person</span><span id="modal-title-text">Хэрэглэгч</span></div><button class="close-btn" id="det-close"><span class="material-icons-round">close</span></button></div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+<!-- Form modal -->
+<div class="form-overlay" id="form-overlay">
+  <div class="form-modal">
+    <div class="fm-top"><div class="fm-title"><span class="material-icons-round">person</span><span id="fm-title">Шинэ хэрэглэгч</span></div><button class="close-btn" id="fm-close"><span class="material-icons-round">close</span></button></div>
+    <form id="user-form" novalidate>
+      <div class="fm-body">
+        <div class="fm-alert" id="fm-alert"><span class="material-icons-round">error_outline</span><span id="fm-alert-msg"></span></div>
+        <div class="fm-grid">
+          <div class="f-group">
+            <label class="f-label"><span class="material-icons-round">badge</span>Нэвтрэх нэр<span class="req">*</span></label>
+            <input class="f-input" id="f-username" type="text" placeholder="username" autocomplete="off">
+            <span class="f-err" id="f-un-err">Заавал оруулна уу (3+ тэмдэгт)</span>
+          </div>
+          <div class="f-group">
+            <label class="f-label"><span class="material-icons-round">corporate_fare</span>Хэсэг</label>
+            <input class="f-input" id="f-division" type="number" min="0" placeholder="0">
+          </div>
+          <div class="f-group">
+            <label class="f-label"><span class="material-icons-round">person</span>Нэр<span class="req">*</span></label>
+            <input class="f-input" id="f-fname" type="text" placeholder="Нэр" autocomplete="off">
+            <span class="f-err" id="f-fname-err">Заавал оруулна уу</span>
+          </div>
+          <div class="f-group">
+            <label class="f-label"><span class="material-icons-round">person_outline</span>Овог</label>
+            <input class="f-input" id="f-lname" type="text" placeholder="Овог" autocomplete="off">
+          </div>
+          <div class="f-group fm-full">
+            <label class="f-label"><span class="material-icons-round">lock</span>Нууц үг<span id="pw-req" class="req">*</span></label>
+            <input class="f-input" id="f-password" type="password" placeholder="Нууц үг" autocomplete="new-password">
+            <span class="f-note" id="pw-note" style="display:none">Хоосон үлдээвэл нууц үг өөрчлөгдөхгүй</span>
+            <span class="f-err" id="f-pw-err">Хамгийн багадаа 6 тэмдэгт</span>
+          </div>
+        </div>
+      </div>
+      <div class="fm-foot">
+        <button type="button" class="btn-cancel" id="fm-cancel"><span class="material-icons-round">close</span>Цуцлах</button>
+        <button type="submit" class="btn-save" id="fm-save"><span class="material-icons-round">save</span>Хадгалах</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Confirm delete -->
+<div class="cfm-overlay" id="cfm-overlay">
+  <div class="cfm-box">
+    <div class="cfm-icon"><span class="material-icons-round">delete_forever</span></div>
+    <div class="cfm-title">Хэрэглэгч устгах уу?</div>
+    <div class="cfm-text" id="cfm-text">Энэ үйлдлийг буцаах боломжгүй.</div>
+    <div class="cfm-btns"><button class="cfm-no" id="cfm-no">Үгүй</button><button class="cfm-yes" id="cfm-yes">Тийм, устгах</button></div>
+  </div>
+</div>
+
+<script>
+const token = localStorage.getItem('accessToken');
+if (!token) location.href = 'index.html';
+
+const fname = localStorage.getItem('fname') || localStorage.getItem('username') || '?';
+const uname = localStorage.getItem('username') || '';
+const divv  = localStorage.getItem('division') || '';
+document.getElementById('av-sm').textContent = fname.slice(0,2).toUpperCase();
+document.getElementById('av-lg').textContent = fname.slice(0,2).toUpperCase();
+document.getElementById('hdr-name').textContent = fname;
+document.getElementById('dp-nm').textContent = fname;
+document.getElementById('dp-un').textContent = uname;
+document.getElementById('dp-div').textContent = divv ? `Хэсэг: ${divv}` : '—';
+const usrBtn = document.getElementById('usr-btn'), dd = document.getElementById('dropdown');
+usrBtn.addEventListener('click', e => { e.stopPropagation(); usrBtn.classList.toggle('open'); dd.classList.toggle('open'); });
+document.addEventListener('click', () => { usrBtn.classList.remove('open'); dd.classList.remove('open'); });
+dd.addEventListener('click', e => e.stopPropagation());
+document.getElementById('logout-btn').addEventListener('click', () => { localStorage.clear(); location.href = 'index.html'; });
+
+// ── State ──
+let allUsers = [];
+let editingId = null, deleteId = null;
+
+const H = { 'Authorization':`Bearer ${token}`, 'Content-Type':'application/json' };
+
+const COLORS = [
+  ['#10b981','#06b6d4'],['#3b82f6','#8b5cf6'],['#f59e0b','#ef4444'],
+  ['#8b5cf6','#ec4899'],['#06b6d4','#3b82f6'],['#84cc16','#10b981'],
+];
+function avColor(id) { return COLORS[(id||0) % COLORS.length]; }
+
+// ── Render ──
+function renderCards(list) {
+  const grid = document.getElementById('cards-grid');
+  if(!list.length){ grid.innerHTML='<div class="state-msg"><span class="material-icons-round">search_off</span>Олдсонгүй</div>'; return; }
+  grid.innerHTML = list.map((u,i) => {
+    const fullName = [u.fname,u.lname].filter(Boolean).join(' ') || u.username;
+    const inits    = fullName.slice(0,2).toUpperCase();
+    const [c1,c2]  = avColor(u.id||i);
+    return `
+      <div class="user-card" style="animation-delay:${i*.035}s">
+        <div class="uc-av" style="background:linear-gradient(135deg,${c1},${c2})">${inits}</div>
+        <div class="uc-name">${fullName}</div>
+        <div class="uc-un">@${u.username}</div>
+        ${u.division!=null?`<div class="uc-div"><span class="material-icons-round" style="font-size:.8rem">corporate_fare</span>Хэсэг ${u.division}</div>`:''}
+        <div class="uc-foot">
+          <button class="ic-btn view-btn" title="Харах"  onclick="openDetail(${u.id})"><span class="material-icons-round">visibility</span></button>
+          <button class="ic-btn edit-btn" title="Засах"  onclick="openForm(${u.id})"><span class="material-icons-round">edit</span></button>
+          <button class="ic-btn del-btn"  title="Устгах" onclick="confirmDelete(${u.id})"><span class="material-icons-round">delete</span></button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+// ── Detail ──
+function openDetail(id) {
+  const u = allUsers.find(x=>x.id===id); if(!u) return;
+  const fullName = [u.fname,u.lname].filter(Boolean).join(' ') || u.username;
+  const [c1,c2]  = avColor(u.id||0);
+  const inits    = fullName.slice(0,2).toUpperCase();
+  const created  = u.created_at ? new Date(u.created_at).toLocaleDateString('mn-MN') : '—';
+  document.getElementById('modal-title-text').textContent = fullName;
+  document.getElementById('modal-body').innerHTML = `
+    <div class="m-profile">
+      <div class="m-av" style="background:linear-gradient(135deg,${c1},${c2})">${inits}</div>
+      <div class="m-name">${fullName}</div>
+      <div class="m-un">@${u.username}</div>
+    </div>
+    <div class="info-grid">
+      <div class="info-item"><div class="info-label"><span class="material-icons-round">badge</span>Нэвтрэх нэр</div><div class="info-val">${u.username}</div></div>
+      <div class="info-item"><div class="info-label"><span class="material-icons-round">person</span>Нэр</div><div class="info-val">${u.fname||'—'}</div></div>
+      <div class="info-item"><div class="info-label"><span class="material-icons-round">person_outline</span>Овог</div><div class="info-val">${u.lname||'—'}</div></div>
+      <div class="info-item"><div class="info-label"><span class="material-icons-round">corporate_fare</span>Хэсэг</div><div class="info-val">${u.division!=null?`Хэсэг ${u.division}`:'—'}</div></div>
+      <div class="info-item" style="grid-column:1/-1"><div class="info-label"><span class="material-icons-round">event</span>Бүртгэгдсэн</div><div class="info-val">${created}</div></div>
+    </div>
+  `;
+  openOverlay('overlay');
+}
+document.getElementById('det-close').addEventListener('click',()=>closeOverlay('overlay'));
+document.getElementById('overlay').addEventListener('click',e=>{ if(e.target.id==='overlay') closeOverlay('overlay'); });
+
+// ── Form ──
+function resetForm() {
+  document.getElementById('user-form').reset();
+  document.getElementById('fm-alert').classList.remove('show');
+  ['f-un-err','f-fname-err','f-pw-err'].forEach(id=>document.getElementById(id).classList.remove('show'));
+}
+
+function openForm(id=null) {
+  resetForm();
+  editingId = id;
+  const isEdit = id !== null;
+  document.getElementById('fm-title').textContent = isEdit ? 'Хэрэглэгч засах' : 'Шинэ хэрэглэгч нэмэх';
+  document.getElementById('f-username').disabled = isEdit;
+  document.getElementById('pw-note').style.display = isEdit ? 'block' : 'none';
+  document.getElementById('pw-req').style.display  = isEdit ? 'none'  : 'inline';
+
+  if(isEdit) {
+    const u = allUsers.find(x=>x.id===id); if(!u) return;
+    document.getElementById('f-username').value = u.username;
+    document.getElementById('f-fname').value    = u.fname   || '';
+    document.getElementById('f-lname').value    = u.lname   || '';
+    document.getElementById('f-division').value = u.division ?? '';
+    document.getElementById('f-password').value = '';
+  }
+  openOverlay('form-overlay');
+}
+
+document.getElementById('add-btn').addEventListener('click',()=>openForm());
+document.getElementById('fm-close').addEventListener('click',()=>closeOverlay('form-overlay'));
+document.getElementById('fm-cancel').addEventListener('click',()=>closeOverlay('form-overlay'));
+document.getElementById('form-overlay').addEventListener('click',e=>{ if(e.target.id==='form-overlay') closeOverlay('form-overlay'); });
+
+document.getElementById('user-form').addEventListener('submit', async e => {
+  e.preventDefault();
+  const isEdit = editingId !== null;
+  let valid = true;
+
+  const unVal = document.getElementById('f-username').value.trim();
+  const fnVal = document.getElementById('f-fname').value.trim();
+  const pwVal = document.getElementById('f-password').value;
+
+  if(!isEdit && (!unVal || unVal.length < 3)) { document.getElementById('f-un-err').classList.add('show'); valid=false; }
+  else document.getElementById('f-un-err').classList.remove('show');
+
+  if(!fnVal) { document.getElementById('f-fname-err').classList.add('show'); valid=false; }
+  else document.getElementById('f-fname-err').classList.remove('show');
+
+  if(!isEdit && pwVal.length < 6) { document.getElementById('f-pw-err').classList.add('show'); valid=false; }
+  else if(isEdit && pwVal && pwVal.length < 6) { document.getElementById('f-pw-err').classList.add('show'); valid=false; }
+  else document.getElementById('f-pw-err').classList.remove('show');
+
+  if(!valid) return;
+
+  const saveBtn = document.getElementById('fm-save');
+  saveBtn.disabled=true;
+  saveBtn.innerHTML='<span class="material-icons-round" style="animation:spin 1s linear infinite">sync</span>Хадгалж байна...';
+
+  const body = {
+    fname:    fnVal,
+    lname:    document.getElementById('f-lname').value.trim() || '',
+    division: document.getElementById('f-division').value !== '' ? parseInt(document.getElementById('f-division').value) : 0,
+  };
+  if(!isEdit) { body.username = unVal; body.password = pwVal; }
+  else if(pwVal) { body.password = pwVal; }
+
+  try {
+    const url    = isEdit ? `/api/user/${editingId}` : '/api/user/create';
+    const method = isEdit ? 'PUT' : 'POST';
+    const res    = await fetch(url, { method, headers:H, body:JSON.stringify(body) });
+    const data   = await res.json();
+    if(!res.ok || !data.success) throw new Error(data.message||'Алдаа гарлаа');
+    closeOverlay('form-overlay');
+    await loadData();
+  } catch(err) {
+    document.getElementById('fm-alert-msg').textContent = err.message;
+    document.getElementById('fm-alert').classList.add('show');
+  } finally {
+    saveBtn.disabled=false;
+    saveBtn.innerHTML='<span class="material-icons-round">save</span>Хадгалах';
+  }
+});
+
+// ── Confirm delete ──
+function confirmDelete(id) {
+  deleteId = id;
+  const u = allUsers.find(x=>x.id===id);
+  const nm = u ? `"${[u.fname,u.lname].filter(Boolean).join(' ')||u.username}"` : `#${id}`;
+  document.getElementById('cfm-text').textContent = `${nm} хэрэглэгчийг устгах уу? Энэ үйлдлийг буцаах боломжгүй.`;
+  openOverlay('cfm-overlay');
+}
+document.getElementById('cfm-no').addEventListener('click',()=>{ deleteId=null; closeOverlay('cfm-overlay'); });
+document.getElementById('cfm-overlay').addEventListener('click',e=>{ if(e.target.id==='cfm-overlay'){ deleteId=null; closeOverlay('cfm-overlay'); } });
+document.getElementById('cfm-yes').addEventListener('click', async ()=>{
+  if(!deleteId) return;
+  const btn = document.getElementById('cfm-yes');
+  btn.textContent='Устгаж байна...'; btn.disabled=true;
+  try {
+    const res  = await fetch(`/api/user/${deleteId}`,{method:'DELETE',headers:H});
+    const data = await res.json();
+    if(!res.ok||!data.success) throw new Error(data.message||'Алдаа');
+    closeOverlay('cfm-overlay'); deleteId=null;
+    await loadData();
+  } catch(err){ alert(err.message); }
+  finally{ btn.textContent='Тийм, устгах'; btn.disabled=false; }
+});
+
+// ── Search ──
+document.getElementById('search').addEventListener('input', function(){
+  const q = this.value.trim().toLowerCase();
+  renderCards(q ? allUsers.filter(u=>[u.fname,u.lname,u.username].some(v=>v&&String(v).toLowerCase().includes(q))) : allUsers);
+});
+
+// ── Overlay helpers ──
+function openOverlay(id)  { document.getElementById(id).classList.add('open');    document.body.style.overflow='hidden'; }
+function closeOverlay(id) { document.getElementById(id).classList.remove('open'); document.body.style.overflow=''; }
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') ['cfm-overlay','form-overlay','overlay'].forEach(closeOverlay); });
+
+// ── Load ──
+async function loadData() {
+  try {
+    const res = await fetch('/api/user',{headers:{Authorization:`Bearer ${token}`}});
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const { users } = await res.json();
+    allUsers = users || [];
+    document.getElementById('count-pill').textContent = allUsers.length;
+    const q = document.getElementById('search').value.trim().toLowerCase();
+    renderCards(q ? allUsers.filter(u=>[u.fname,u.lname,u.username].some(v=>v&&String(v).toLowerCase().includes(q))) : allUsers);
+  } catch {
+    document.getElementById('cards-grid').innerHTML='<div class="state-msg"><span class="material-icons-round">error_outline</span>Мэдээлэл татахад алдаа гарлаа</div>';
+  }
+}
+loadData();
+</script>
+</body>
+</html>

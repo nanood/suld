@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — Сүлд Систем</title>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #312e81 100%);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      color: #fff;
+    }
+
+    body::before, body::after {
+      content: ''; position: fixed; border-radius: 50%;
+      filter: blur(90px); opacity: 0.12; pointer-events: none; z-index: 0;
+    }
+    body::before {
+      width: 650px; height: 650px;
+      background: radial-gradient(circle, #3b82f6, #8b5cf6);
+      top: -220px; left: -220px;
+    }
+    body::after {
+      width: 550px; height: 550px;
+      background: radial-gradient(circle, #06b6d4, #2563eb);
+      bottom: -180px; right: -180px;
+    }
+
+    /* ── Header ── */
+    .hdr {
+      position: sticky; top: 0; z-index: 200;
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 1rem;
+      background: rgba(10, 16, 32, 0.88);
+      backdrop-filter: blur(28px);
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+      padding: 0.7rem 2rem;
+    }
+
+    .hdr-brand {
+      display: flex; align-items: center; gap: 1rem;
+      text-decoration: none;
+    }
+    .hdr-brand img {
+      height: 46px; width: auto;
+      filter: drop-shadow(0 2px 14px rgba(59,130,246,0.45));
+    }
+    .brand-name {
+      font-size: 1.2rem; font-weight: 900;
+      background: linear-gradient(135deg, #60a5fa, #a78bfa);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+      white-space: nowrap;
+    }
+
+    /* ── User dropdown ── */
+    .hdr-user { position: relative; flex-shrink: 0; }
+
+    .usr-btn {
+      display: flex; align-items: center; gap: 0.65rem;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 12px; padding: 0.45rem 0.85rem 0.45rem 0.5rem;
+      cursor: pointer; color: #fff; font-size: 0.88rem;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .usr-btn:hover { background: rgba(255,255,255,0.11); }
+    .usr-btn.open   { border-color: rgba(99,102,241,0.5); background: rgba(99,102,241,0.12); }
+
+    .av {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 0.82rem; flex-shrink: 0;
+      letter-spacing: 0;
+    }
+    .chevron { font-size: 1.05rem !important; opacity: 0.55; transition: transform 0.2s; }
+    .usr-btn.open .chevron { transform: rotate(180deg); }
+
+    .dropdown {
+      position: absolute; top: calc(100% + 10px); right: 0; width: 290px;
+      background: rgba(10, 16, 36, 0.97);
+      backdrop-filter: blur(28px);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 18px;
+      box-shadow: 0 24px 70px rgba(0,0,0,0.6);
+      opacity: 0; transform: translateY(-10px) scale(0.97);
+      pointer-events: none;
+      transition: opacity 0.18s, transform 0.18s;
+      z-index: 300;
+    }
+    .dropdown.open { opacity: 1; transform: none; pointer-events: all; }
+
+    .dp-head {
+      display: flex; align-items: center; gap: 1rem;
+      padding: 1.3rem 1.3rem 1rem;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+    }
+    .av-lg {
+      width: 52px; height: 52px; border-radius: 50%;
+      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 1.15rem; flex-shrink: 0;
+      box-shadow: 0 0 0 4px rgba(59,130,246,0.2);
+    }
+    .dp-nm  { font-weight: 700; font-size: 1rem; line-height: 1.3; }
+    .dp-sub { font-size: 0.72rem; color: rgba(255,255,255,0.4); margin-top: 0.2rem; }
+
+    .dp-body { padding: 0.9rem 1.3rem; display: flex; flex-direction: column; gap: 0.6rem; }
+    .dp-row  { display: flex; align-items: center; gap: 0.55rem; font-size: 0.82rem; color: rgba(255,255,255,0.62); }
+    .dp-row .material-icons-round { font-size: 1rem; color: #60a5fa; flex-shrink: 0; }
+
+    .dp-foot { padding: 0.6rem 1.3rem 1.3rem; }
+    .dp-divider { height: 1px; background: rgba(255,255,255,0.07); margin-bottom: 0.9rem; }
+
+    .logout-btn {
+      width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+      background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.25);
+      color: #fca5a5; border-radius: 10px; padding: 0.6rem;
+      cursor: pointer; font-size: 0.84rem; font-weight: 600;
+      transition: background 0.2s;
+    }
+    .logout-btn:hover { background: rgba(239,68,68,0.22); }
+    .logout-btn .material-icons-round { font-size: 1rem; }
+
+    /* ── Main ── */
+    .main { padding: 2rem; max-width: 1240px; margin: 0 auto; position: relative; z-index: 1; }
+
+    /* Welcome banner */
+    .welcome {
+      background: linear-gradient(135deg, rgba(59,130,246,0.1), rgba(139,92,246,0.1));
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 20px; padding: 1.5rem 2rem;
+      display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+      margin-bottom: 2rem;
+      animation: fadeUp 0.5s ease both;
+    }
+    .welcome-text h2   { font-size: 1.5rem; font-weight: 800; margin-bottom: 0.3rem; }
+    .welcome-text p    { color: rgba(255,255,255,0.45); font-size: 0.88rem; }
+    .welcome-date {
+      text-align: right; color: rgba(255,255,255,0.35); font-size: 0.82rem; line-height: 1.7;
+      flex-shrink: 0;
+    }
+    .welcome-date strong { color: rgba(255,255,255,0.6); font-size: 1rem; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Grid */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+      gap: 1.5rem;
+    }
+
+    /* Stat card */
+    .card {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 20px; padding: 1.75rem 1.75rem 1.5rem;
+      position: relative; overflow: hidden;
+      transition: transform 0.25s, box-shadow 0.25s;
+      animation: fadeUp 0.5s ease both;
+    }
+    .card:nth-child(1) { animation-delay: 0.08s; }
+    .card:nth-child(2) { animation-delay: 0.16s; }
+    .card:nth-child(3) { animation-delay: 0.24s; }
+    .card:hover        { transform: translateY(-7px); box-shadow: 0 22px 64px rgba(0,0,0,0.38); }
+
+    /* Top accent bar */
+    .card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    }
+    .card.blue::before  { background: linear-gradient(90deg, #3b82f6, #6366f1); }
+    .card.amber::before { background: linear-gradient(90deg, #f59e0b, #ef4444); }
+    .card.green::before { background: linear-gradient(90deg, #10b981, #06b6d4); }
+
+    /* Ambient glow */
+    .card::after {
+      content: ''; position: absolute; bottom: -60px; right: -60px;
+      width: 180px; height: 180px; border-radius: 50%;
+      opacity: 0.06; pointer-events: none;
+    }
+    .card.blue::after  { background: #3b82f6; }
+    .card.amber::after { background: #f59e0b; }
+    .card.green::after { background: #10b981; }
+
+    .card-head { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1.25rem; }
+
+    .card-icon {
+      width: 56px; height: 56px; border-radius: 15px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .card.blue  .card-icon { background: rgba(59,130,246,0.18); color: #60a5fa; }
+    .card.amber .card-icon { background: rgba(245,158,11,0.18); color: #fbbf24; }
+    .card.green .card-icon { background: rgba(16,185,129,0.18); color: #34d399; }
+    .card-icon .material-icons-round { font-size: 1.7rem; }
+
+    .card-lbl { font-size: 0.78rem; font-weight: 700; color: rgba(255,255,255,0.45); text-transform: uppercase; letter-spacing: 0.07em; }
+
+    .card-num {
+      font-size: 3.4rem; font-weight: 800; line-height: 1; margin-bottom: 0.4rem;
+      font-variant-numeric: tabular-nums;
+    }
+    .card.blue  .card-num { color: #60a5fa; }
+    .card.amber .card-num { color: #fbbf24; }
+    .card.green .card-num { color: #34d399; }
+
+    .card-desc { font-size: 0.79rem; color: rgba(255,255,255,0.38); margin-bottom: 1.5rem; }
+
+    .card-btn {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      padding: 0.65rem 1.35rem; border-radius: 11px;
+      border: none; cursor: pointer; font-weight: 700; font-size: 0.84rem;
+      transition: transform 0.15s, box-shadow 0.15s, filter 0.15s;
+    }
+    .card-btn .material-icons-round { font-size: 1rem; }
+    .card.blue  .card-btn { background: linear-gradient(135deg, #3b82f6, #6366f1); color: #fff; box-shadow: 0 6px 22px rgba(59,130,246,0.38); }
+    .card.amber .card-btn { background: linear-gradient(135deg, #f59e0b, #ef4444); color: #fff; box-shadow: 0 6px 22px rgba(245,158,11,0.38); }
+    .card.green .card-btn { background: linear-gradient(135deg, #10b981, #06b6d4); color: #fff; box-shadow: 0 6px 22px rgba(16,185,129,0.38); }
+    .card-btn:hover  { transform: translateY(-2px) scale(1.03); filter: brightness(1.1); }
+    .card-btn:active { transform: scale(0.97); }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      .main { padding: 1rem; }
+      .hdr  { padding: 0.6rem 1rem; }
+      .hdr-name { display: none; }
+      .welcome-date { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── HEADER ── -->
+<header class="hdr">
+  <a href="dashboard.html" class="hdr-brand">
+    <img src="logo-big.png" alt="Сүлд">
+    <span class="brand-name">Сүлд Систем</span>
+  </a>
+
+  <div class="hdr-user">
+    <button class="usr-btn" id="usr-btn">
+      <div class="av" id="av-sm">?</div>
+      <span class="hdr-name" id="hdr-name">...</span>
+      <span class="material-icons-round chevron">expand_more</span>
+    </button>
+
+    <div class="dropdown" id="dropdown">
+      <div class="dp-head">
+        <div class="av-lg" id="av-lg">?</div>
+        <div>
+          <div class="dp-nm" id="dp-nm">—</div>
+          <div class="dp-sub" id="dp-sub">Хэрэглэгч</div>
+        </div>
+      </div>
+      <div class="dp-body">
+        <div class="dp-row"><span class="material-icons-round">badge</span><span id="dp-un">—</span></div>
+        <div class="dp-row"><span class="material-icons-round">corporate_fare</span><span id="dp-div">—</span></div>
+        <div class="dp-row"><span class="material-icons-round">event</span><span id="dp-date">—</span></div>
+      </div>
+      <div class="dp-foot">
+        <div class="dp-divider"></div>
+        <button class="logout-btn" id="logout-btn">
+          <span class="material-icons-round">logout</span>Системээс гарах
+        </button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ── MAIN ── -->
+<main class="main">
+  <div class="welcome">
+    <div class="welcome-text">
+      <h2 id="welcome-h">Сайн уу!</h2>
+      <p>Сүлд Систем — Удирдлагын самбар</p>
+    </div>
+    <div class="welcome-date" id="cur-date"></div>
+  </div>
+
+  <div class="grid">
+    <div class="card blue">
+      <div class="card-head">
+        <div class="card-icon"><span class="material-icons-round">business</span></div>
+        <span class="card-lbl">Салбарууд</span>
+      </div>
+      <div class="card-num" id="branches-count">—</div>
+      <div class="card-desc">Бүртгэлтэй нийт салбар</div>
+      <button class="card-btn" onclick="location.href='branches.html'">
+        <span class="material-icons-round">arrow_forward</span>Дэлгэрэнгүй
+      </button>
+    </div>
+
+    <div class="card amber">
+      <div class="card-head">
+        <div class="card-icon"><span class="material-icons-round">report_problem</span></div>
+        <span class="card-lbl">Гэмтэл</span>
+      </div>
+      <div class="card-num" id="incidents-count">—</div>
+      <div class="card-desc">Бүртгэгдсэн нийт гэмтэл</div>
+      <button class="card-btn" onclick="location.href='incidents.html'">
+        <span class="material-icons-round">arrow_forward</span>Дэлгэрэнгүй
+      </button>
+    </div>
+
+    <div class="card green">
+      <div class="card-head">
+        <div class="card-icon"><span class="material-icons-round">people</span></div>
+        <span class="card-lbl">Хэрэглэгчид</span>
+      </div>
+      <div class="card-num" id="users-count">—</div>
+      <div class="card-desc">Бүртгэлтэй нийт хэрэглэгч</div>
+      <button class="card-btn" onclick="location.href='users.html'">
+        <span class="material-icons-round">arrow_forward</span>Дэлгэрэнгүй
+      </button>
+    </div>
+  </div>
+</main>
+
+<script>
+  const token = localStorage.getItem('accessToken');
+  if (!token) location.href = 'index.html';
+
+  // Date display
+  const now  = new Date();
+  const days = ['Ням','Даваа','Мягмар','Лхагва','Пүрэв','Баасан','Бямба'];
+  document.getElementById('cur-date').innerHTML =
+    `<strong>${now.getFullYear()}.${String(now.getMonth()+1).padStart(2,'0')}.${String(now.getDate()).padStart(2,'0')}</strong><br>${days[now.getDay()]}`;
+
+  // Init from localStorage
+  const storedFname = localStorage.getItem('fname') || '';
+  const storedUser  = localStorage.getItem('username') || '';
+  const storedDiv   = localStorage.getItem('division') || '';
+  const dispName    = (storedFname || storedUser || '?').trim();
+  const inits       = dispName.slice(0, 2).toUpperCase();
+
+  function setDisplay(nm, un, div, sub, dateStr) {
+    document.getElementById('av-sm').textContent  = nm.slice(0,2).toUpperCase();
+    document.getElementById('av-lg').textContent  = nm.slice(0,2).toUpperCase();
+    document.getElementById('hdr-name').textContent = nm.split(' ')[0];
+    document.getElementById('dp-nm').textContent  = nm;
+    document.getElementById('dp-sub').textContent = sub || 'Хэрэглэгч';
+    document.getElementById('dp-un').textContent  = un;
+    document.getElementById('dp-div').textContent = div ? `Хэсэг: ${div}` : '—';
+    document.getElementById('dp-date').textContent = dateStr || '—';
+    document.getElementById('welcome-h').textContent = `Сайн уу, ${nm.split(' ')[0]}!`;
+  }
+
+  setDisplay(dispName, storedUser, storedDiv, 'Хэрэглэгч', '');
+
+  // Fetch current user profile
+  (async () => {
+    try {
+      const res = await fetch('/api/auth/account', { headers: { Authorization: `Bearer ${token}` } });
+      if (!res.ok) return;
+      const { data } = await res.json();
+      if (!data) return;
+      const fullName = [data.fname, data.lname].filter(Boolean).join(' ') || data.username;
+      const dateStr  = data.created_at
+        ? `Бүртгэгдсэн: ${new Date(data.created_at).toLocaleDateString('mn-MN')}`
+        : '';
+      setDisplay(fullName, data.username, data.division, 'Хэрэглэгч', dateStr);
+    } catch {}
+  })();
+
+  // Dropdown toggle
+  const usrBtn = document.getElementById('usr-btn');
+  const dd     = document.getElementById('dropdown');
+  usrBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    usrBtn.classList.toggle('open');
+    dd.classList.toggle('open');
+  });
+  document.addEventListener('click', () => {
+    usrBtn.classList.remove('open');
+    dd.classList.remove('open');
+  });
+  dd.addEventListener('click', e => e.stopPropagation());
+
+  document.getElementById('logout-btn').addEventListener('click', () => {
+    localStorage.clear();
+    location.href = 'index.html';
+  });
+
+  // Fetch stats
+  (async () => {
+    const h = { Authorization: `Bearer ${token}` };
+    try {
+      const [bR, iR, uR] = await Promise.all([
+        fetch('/api/branches'),
+        fetch('/api/incidents', { headers: h }),
+        fetch('/api/user',      { headers: h })
+      ]);
+      if (bR.ok) { const d = await bR.json(); document.getElementById('branches-count').textContent = d.data?.length ?? '—'; }
+      if (iR.ok) { const d = await iR.json(); document.getElementById('incidents-count').textContent = d.data?.length ?? '—'; }
+      if (uR.ok) { const d = await uR.json(); document.getElementById('users-count').textContent = d.users?.length ?? '—'; }
+    } catch (e) { console.error(e); }
+  })();
+</script>
+</body>
+</html>
